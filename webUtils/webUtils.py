@@ -150,14 +150,4 @@ if __name__ == "__main__":
 
 
 
-def getDB(typed):
 
-    
-    dbs = {
-        "mongo": mongo,
-        "mysql": mysql
-    }
-
-    assert typed in dbs, "Invalid"
-
-    return dbs[typed]

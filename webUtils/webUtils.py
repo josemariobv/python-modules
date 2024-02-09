@@ -57,7 +57,7 @@ def web_request(  logger=logging.getLogger("web_request"),  **requestKwargs  )  
         return None, str(exception.args)
 
 
-def try_web_request(  logger=logging.getLogger("web_request"),  maxAttempts=0,  secondsBeforeRetry=1,  **requestKwargs  )  ->  ( requests.Response | None, str ):
+def try_web_request(  logger=logging.getLogger("web_request"),  maxRetries=0,  secondsBeforeRetry=1,  **requestKwargs  )  ->  ( requests.Response | None, str ):
     
     response , error  =  web_request( logger=logger, **requestKwargs )
         
@@ -65,12 +65,12 @@ def try_web_request(  logger=logging.getLogger("web_request"),  maxAttempts=0,  
         return response, error
     
     
-    for attempt in range( 1, maxAttempts+1 ):
+    for attempt in range( 1, maxRetries+1 ):
         
         logging.info( f"Waiting {secondsBeforeRetry} seconds before retring" )
         time.sleep( secondsBeforeRetry )
 
-        logger.warning( f"Retring web_request: ({attempt}/{maxAttempts})" )
+        logger.warning( f"Retring web_request: ({attempt}/{maxRetries})" )
         response , error  =  web_request( logger=logger, **requestKwargs )
         
         if error:
@@ -115,7 +115,7 @@ def log_web_request(  response:requests.Response, logger=logging.getLogger("web_
 
 def check_web_request_errors( response: requests.Response ) -> str:
     """Needs to be implemented"""
-    is_successful_response = response.status_code >= 200 and response.status_code <= 300
+    is_successful_response = response.status_code >= 200 and response.status_code < 300
     if  is_successful_response:
         return ""
     
@@ -140,8 +140,24 @@ if __name__ == "__main__":
     
 
     try_web_request(
-            url="http://localhostd/test", 
+            url="http://localhost/testddf", 
             method="GET",
             logger=logger,
-            maxAttempts=2
+            maxRetries=1
             )
+
+
+
+
+
+def getDB(typed):
+
+    
+    dbs = {
+        "mongo": mongo,
+        "mysql": mysql
+    }
+
+    assert typed in dbs, "Invalid"
+
+    return dbs[typed]

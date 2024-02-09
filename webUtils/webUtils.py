@@ -115,11 +115,12 @@ def log_web_request(  response:requests.Response, logger=logging.getLogger("web_
 
 def check_web_request_errors( response: requests.Response ) -> str:
     """Needs to be implemented"""
-    is_successful_response = response.status_code >= 200 and response.status_code < 300
+    is_successful_response  =  response.status_code >= 200 and response.status_code < 300
+
     if  is_successful_response:
-        return ""
+        return  ""
     
-    return f"""
+    return  f"""
             Status code ( { response.url } ) : { response.status_code } 
             response content: { response.content }
             """

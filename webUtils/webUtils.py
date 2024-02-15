@@ -19,6 +19,49 @@ import time
 """
 
 
+def retry_function( function ):
+
+    def wraped_retry_function(  logger=logging.getLogger("TEST") ,validateResultFunc=is_successful, secondsBeforeRetry=1, maxRetryAttempts=0,  *args, **kwargs ):
+        
+        logger.info(f"{function.__name__}: parms: {kwargs}")
+        
+        result  =  function( *args, **kwargs )
+        
+        success  =  validateResultFunc( result )
+
+        if success:
+            
+            return result
+        
+        for attempt in range( 1,  maxRetryAttempts+1 ):
+            
+            logger.info( f"Waiting {secondsBeforeRetry} seconds before retry {attempt}/{maxRetryAttempts}" )
+            time.sleep( secondsBeforeRetry )
+            logger.info( f"Retring now" )
+
+            result  =  function( *args, **kwargs )
+
+            if validateResultFunc( result ):
+
+                return result
+            
+        return result
+
+
+    return wraped_retry_function
+
+def is_successful( result:tuple ) -> bool:
+    
+    error = result[1]
+    
+    if error:
+        return False
+    
+    return True
+
+
+
+@retry_function
 def web_request(  logger=logging.getLogger("web_request"),  **requestKwargs  )  ->  ( requests.Response | None, str ):
     
     """
@@ -140,11 +183,10 @@ if __name__ == "__main__":
     logger  =  logging.getLogger("TEST")
     
 
-    try_web_request(
+    web_request(
             url="http://localhost/testddf", 
             method="GET",
             logger=logger,
-            maxRetries=1
             )
 
 
